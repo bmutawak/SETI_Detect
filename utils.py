@@ -1,5 +1,40 @@
 import matplotlib.pyplot as plt
 import cv2
+import os
+
+
+
+
+def get_paths(folder_path, recurse=True, extensions=None):
+    """
+    Grabs all relevant file paths from folder_path with extension.
+
+    Parameters
+    ----------
+    folder_path : PATH-STR
+        Path to parent folder.
+    recurse : BOOL
+        T/F if we want to recurse all subdirectories
+    extension : LIST, optional
+        Exclusive list of extensions. The default is None.
+
+    Returns
+    -------
+    List of absolute paths.
+    
+    """
+    
+    # Make sure directory exists
+    if not  os.path.exists(folder_path):
+        print('ERROR: FOLDER_PATH NOT FOUND')
+        return []
+    
+    
+    
+    
+    
+    
+
 
 
 def plot_one_cadence(cadence, cmap = 'plasma'):
