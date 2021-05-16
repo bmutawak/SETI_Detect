@@ -6,12 +6,12 @@ import cv2
 import numpy as np
 from os.path import join, basename, dirname, exists
 import json
-import pickle
 from utils import get_paths
+import pandas as pd
 
 class SETIDataset(Dataset):
     
-    def __init__(self, data_folder, labels, transform=None):
+    def __init__(self, data_folder, labels_path, transform=None):
         """
         Initializes SETI dataset class.
 
@@ -19,7 +19,7 @@ class SETIDataset(Dataset):
         ----------
         data_folder : PATH-STR
             Path to parent data folder.
-        labels : PATH-STR
+        labels_path : PATH-STR
             Path to label file.
         transform : FUNCTION, optional
             Function to preprocess a given cadence. The default is None.
@@ -31,12 +31,38 @@ class SETIDataset(Dataset):
         """
         
         # Check for cached file names
-        cache_fn = join(data_folder, "file_paths.cache")
+        cache_fn = join(data_folder, "file_paths.json")
         if exists(cache_fn):
-            with open(cache_fn, 'rb') as fp:
-                data_file_paths = pickle.load(fp)
+            with open(cache_fn, 'r') as fp:
+                data = json.load(fp)
+                self.data_file_paths = data['file_paths']
+                self.targets = data['targets']
         else:
             
             # Grab all relevant file paths
-            data_file_paths = get_paths(data_folder, ext='npy')
+            self.data_file_paths = get_paths(data_folder, extensions=('.npy'))
             
+            # Open up labels path
+            labels = pd.read_csv(labels_path, dtype={'id': str, 'target':int})
+            labels = dict(labels.values)
+            
+            # Iterate through each label file, accumulate the label for it
+            self.targets = []
+            for file in self.data_file_paths:
+                
+                # Grab just the basename, no extension
+                file_key = basename(file).split('.')[0]
+                self.targets.append(labels[file_key])
+                
+            
+            # Cache for later use
+            with open(cache_fn, 'w') as fp:
+                json.dump({'file_paths':self.data_file_paths, 'targets':self.targets}, fp)
+        
+        
+        def __len__(self):
+            return len(self.targets)
+        
+        def __getitem__(self, idx):
+            return
+        

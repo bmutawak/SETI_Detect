@@ -5,7 +5,7 @@ import os
 
 
 
-def get_paths(folder_path, recurse=True, extensions=None):
+def get_paths(folder_path, recurse=True, extensions=''):
     """
     Grabs all relevant file paths from folder_path with extension.
 
@@ -15,8 +15,8 @@ def get_paths(folder_path, recurse=True, extensions=None):
         Path to parent folder.
     recurse : BOOL
         T/F if we want to recurse all subdirectories
-    extension : LIST, optional
-        Exclusive list of extensions. The default is None.
+    extension : TUPLE, optional
+        Exclusive tuple of extensions. The default is None.
 
     Returns
     -------
@@ -29,7 +29,15 @@ def get_paths(folder_path, recurse=True, extensions=None):
         print('ERROR: FOLDER_PATH NOT FOUND')
         return []
     
+    file_paths = []
+    if recurse:
+        for folder, subs, files in os.walk(folder_path):
+            file_paths.extend([os.path.join(folder, file) for file in files if file.endswith(extensions)])
+    else:
+        file_paths = [os.path.join(folder_path, path) for path in os.listdir(folder_path) if path.endswith(extensions)]
     
+    
+    return file_paths
     
     
     
