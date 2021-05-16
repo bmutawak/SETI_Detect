@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
-
-
+import matplotlib.pyplot as plt
+from utils import plot_one_cadence
 
 
 
@@ -12,12 +12,8 @@ def main():
     fp = '/home/bassam/Desktop/dev/kaggle/SETI_Detect/data/train/1/1a0fc0743024.npy'
     data = np.load(fp)
     
-    # Create window
-    cv2.namedWindow('image')
-    
     # Display
-    cv2.imshow('image', data[0, :, :].astype(np.single))
-    cv2.waitKey(0)
+    plot_one_cadence(data)
     
     return
 
