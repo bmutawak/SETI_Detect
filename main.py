@@ -34,6 +34,8 @@ def main():
     
     dataset = SETIDataset(train_dir, labels)
     
+    dataset[1]
+    
     
     return
 

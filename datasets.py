@@ -62,24 +62,26 @@ class SETIDataset(Dataset):
                 json.dump({'file_paths':self.data_file_paths, 'targets':self.targets}, fp)
         
         
-        def __len__(self):
-            return len(self.targets)
+    def __len__(self):
+        return len(self.targets)
+    
+    def __getitem__(self, idx):
         
-        def __getitem__(self, idx):
-            
-            # Read file at given index
-            data = np.load(self.data_file_paths[idx])
-            data = data.astype(np.float32)
-            data = np.vstack(data).transpose((1, 0))
-            
-            # Perform augmentations if desired
-            if not self.transform is None:
-                data = self.transform(data)
-            else:
-                data = data[np.newaxis, :, :]
-                data = torch.from_numpy(data).float()
-            
-            # Grab label, return
-            label = torch.tensor(self.targets[idx]).float()
-            return data, label
+        # Read file at given index
+        data = np.load(self.data_file_paths[idx])
+        data = data.astype(np.float32)
+        
+        # Is this a good idea?
+        # data = np.vstack(data).transpose((1, 0))
+        
+        # Perform augmentations if desired
+        if not self.transform is None:
+            data = self.transform(data)
+        else:
+            data = data[np.newaxis, :, :]
+            data = torch.from_numpy(data).float()
+        
+        # Grab label, return
+        label = torch.tensor(self.targets[idx]).float()
+        return data, label
         
