@@ -4,6 +4,21 @@ import matplotlib.pyplot as plt
 from utils import plot_one_cadence
 from datasets import SETIDataset
 
+
+
+# Relevant hyperparamters
+hyp = {
+       'image_size':256,
+       'batch_size':16,
+       'vertical_flip_prob':0.5,
+       'horizontal_flip_prob':0.5,
+       'rotation_degrees':25,
+       'lr':0.001,
+       'adam':False,
+       
+       
+       
+       }
 def process_cadence(cadence):
     """
     Preprocesses a cadence to reduce backgrond noise 
@@ -23,14 +38,10 @@ def process_cadence(cadence):
 
 def main():
     
-    # # Load a sample image
-    # fp = '/home/bassam/Desktop/dev/kaggle/SETI_Detect/data/train/0/0030dc7cf6e0.npy'
-    # data = np.load(fp)
-    
-    # # Display
-    # plot_one_cadence(data)
+    # Paths to relevant files
     train_dir = './data/train'
     labels = './data/train_labels.csv'
+    
     
     dataset = SETIDataset(train_dir, labels)
     

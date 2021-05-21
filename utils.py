@@ -1,8 +1,11 @@
 import matplotlib.pyplot as plt
 import cv2
 import os
-
-
+from os.path import join, basename, dirname, exists
+import torch
+from torchvision import transforms
+import json
+import pandas as pd
 
 
 def get_paths(folder_path, recurse=True, extensions=''):
@@ -38,12 +41,6 @@ def get_paths(folder_path, recurse=True, extensions=''):
     
     
     return file_paths
-    
-    
-    
-    
-
-
 
 def plot_one_cadence(cadence, cmap = 'plasma'):
     """
@@ -79,7 +76,97 @@ def plot_one_cadence(cadence, cmap = 'plasma'):
     plt.show()
     return
 
+
+def get_training_augmentations(image_size, rotation_degrees, horizontal_flip_prob, vertical_flip_prob):
+    """
+    Creates a function to perform all training image augmentations. 
+
+    Returns
+    -------
+    Function.
+
+    """
+
+    # Create sequential transforms
+    augmentations = torch.nn.Sequential(
+        transforms.Resize(image_size),
+        transforms.RandomRotation(rotation_degrees),
+        transforms.RandomHorizontalFlip(p=horizontal_flip_prob),
+        transforms.RandomVerticalFlip(p=vertical_flip_prob),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                         std=[0.229, 0.224, 0.225])
+    )   
+
+    return augmentations
+
+def get_validation_augmentations(image_size):
+    """
+    Creates a function to perform all validation augmentations
+
+    Parameters
+    ----------
+    image_size : INT
+        Size of image.
+
+    Returns
+    -------
+    Function.
+
+    """
     
+    # Create sequential transforms
+    augmentations = torch.nn.Sequential(
+        transforms.Resize(image_size),
+        transforms.ToTensor())
     
+    return augmentations
+
+def get_files_paths_and_labels(data_folder):
+    """
     
+
+    Parameters
+    ----------
+    data_folder : Path, STR
+        Path to training folder.
+
+    Returns
+    -------
+    data_file_paths : LIST
+        List of paths to data.
+    targets : LIST
+        DESCRIPTION.
+
+    """
+    # Check for cached file names
+    cache_fn = join(data_folder, "file_paths.json")
+    if exists(cache_fn):
+        with open(cache_fn, 'r') as fp:
+            data = json.load(fp)
+            data_file_paths = data['file_paths']
+            targets = data['targets']
+    else:
+        
+        # Grab all relevant file paths
+        data_file_paths = get_paths(data_folder, extensions=('.npy'))
+        
+        # Open up labels path
+        labels_path = join(dirname(data_folder), "train_labels.csv")
+        labels = pd.read_csv(labels_path, dtype={'id': str, 'target':int})
+        labels = dict(labels.values)
+        
+        # Iterate through each label file, accumulate the label for it
+        targets = []
+        for file in data_file_paths:
+            
+            # Grab just the basename, no extension
+            file_key = basename(file).split('.')[0]
+            targets.extend(labels[file_key])
+            
+        
+        # Cache for later use
+        with open(cache_fn, 'w') as fp:
+            json.dump({'file_paths':data_file_paths, 'targets':targets}, fp)
     
+    return data_file_paths, targets
