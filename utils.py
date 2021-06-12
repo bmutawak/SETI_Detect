@@ -124,8 +124,8 @@ def get_validation_augmentations(image_size):
 
 def get_files_paths_and_labels(data_folder):
     """
+    Gets all file paths for data and labels.
     
-
     Parameters
     ----------
     data_folder : Path, STR
@@ -136,7 +136,7 @@ def get_files_paths_and_labels(data_folder):
     data_file_paths : LIST
         List of paths to data.
     targets : LIST
-        DESCRIPTION.
+        List of target values.
 
     """
     # Check for cached file names
