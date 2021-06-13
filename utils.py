@@ -1,12 +1,10 @@
 import matplotlib.pyplot as plt
-import cv2
 import os
 from os.path import join, basename, dirname, exists
 import torch
 from torchvision import transforms
 import json
 import pandas as pd
-
 
 def get_paths(folder_path, recurse=True, extensions=''):
     """
@@ -16,7 +14,7 @@ def get_paths(folder_path, recurse=True, extensions=''):
     ----------
     folder_path : PATH-STR
         Path to parent folder.
-    recurse : BOOL
+    recurse : BOOL, optional
         T/F if we want to recurse all subdirectories
     extension : TUPLE, optional
         Exclusive tuple of extensions. The default is None.
@@ -77,7 +75,7 @@ def plot_one_cadence(cadence, cmap = 'plasma'):
     return
 
 
-def get_training_augmentations(image_size, rotation_degrees, horizontal_flip_prob, vertical_flip_prob):
+def get_training_augmentations(hyp):
     """
     Creates a function to perform all training image augmentations. 
 
@@ -89,18 +87,19 @@ def get_training_augmentations(image_size, rotation_degrees, horizontal_flip_pro
 
     # Create sequential transforms
     augmentations = torch.nn.Sequential(
-        transforms.Resize(image_size),
-        transforms.RandomRotation(rotation_degrees),
-        transforms.RandomHorizontalFlip(p=horizontal_flip_prob),
-        transforms.RandomVerticalFlip(p=vertical_flip_prob),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                         std=[0.229, 0.224, 0.225])
+        transforms.Resize(hyp['image_size']),
+        transforms.RandomRotation(hyp['rotation_degrees']),
+        transforms.RandomHorizontalFlip(p=hyp['horizontal_flip_prob']),
+        transforms.RandomVerticalFlip(p=hyp['vertical_flip_prob']),
+        transforms.Normalize(mean=[0.456, 0.450, 0.443, 0.423, 0.422, 0.423],
+                             std=[0.244, 0.243, 0.245, 0.245, 0.249, 0.2409],
+                             inplace=True)
+       
     )   
 
     return augmentations
 
-def get_validation_augmentations(image_size):
+def get_validation_augmentations(hyp):
     """
     Creates a function to perform all validation augmentations
 
@@ -117,8 +116,7 @@ def get_validation_augmentations(image_size):
     
     # Create sequential transforms
     augmentations = torch.nn.Sequential(
-        transforms.Resize(image_size),
-        transforms.ToTensor())
+        transforms.Resize(hyp['image_size']))
     
     return augmentations
 
@@ -162,7 +160,7 @@ def get_files_paths_and_labels(data_folder):
             
             # Grab just the basename, no extension
             file_key = basename(file).split('.')[0]
-            targets.extend(labels[file_key])
+            targets.extend([labels[file_key]])
             
         
         # Cache for later use
